@@ -1,24 +1,57 @@
- name: Intall and configure tomcat
+---
+  - name: Intall and configure tomcat
     hosts: 54.72.117.90
     gather_facts: false
     vars:
        req_java: java-1.8.0-openjdk
        set_java: jre-1.8.0-openjdk
-    tasks:
+       req_tomcat_ver: 10.0.0
+       tomcat_url: http://mirror.metrocast.net/apache/tomcat/tomcat-{{req_tomcat_ver.split('.')[0]}}/v{{req_tomcat_ver}}/bin/apache-tomcat-{{apache-tomcat-}}.tar.gz
+       tomcat_port: 8090 # to replace tomcat port dynamically we would need to create a seperate server. xml file as well.. line 69 of that file just replace port = 8080 with "{{tomcat_port}}"
+    become: yes
 
+    tasks:
+      - name: Downloading required Tomcat
+        get_url:
+          url: "{{tomcat_url}}"
+          dest: /usr/local # depends whereever you would like it to download 
+     
+      - name: Extracting downloaded tomcat
+        unarchive:
+           src: "/usr/local/apache-tomcat-{{req_tomcat_ver}}.tar.gz"
+           dest: /usr/local
+           remote_src: yes 
+     
+      - name: Renaming tomcat home
+        command: mv /usr/local/apache-tomcat-{{req_tomcat_ver}} /usr/local/latest
+      - name: starting tomcat
+        shell: nohup /usr/local/latest/bin/startup.sh & 
+
+      - name: Replacing default port with required port
+        template:
+            src: server.yml.j2
+            dest: /usr/local/latest/conf/server.xml
       - name: Updateing repos
         yum:
            name: "*"
            state: latest
+     
       - name: Installing required Java
         yum: 
           name: "{{req_java}}"
           state: present
+      
       - name: Setting default java
         alternatives: 
           name: java
           link: /usr/bin/java # it can be obtain via java --version 
           path: /usr/lib/jvm/set_java/bin.java
+
+          
+
+
+
+
           
 
 
