@@ -1,17 +1,24 @@
----
-  - name: Intall and configure tomcat
+ name: Intall and configure tomcat
     hosts: 54.72.117.90
     gather_facts: false
+    vars:
+       req_java: java-1.8.0-openjdk
+       set_java: jre-1.8.0-openjdk
     tasks:
 
-      - name: UPdateing repos
+      - name: Updateing repos
         yum:
            name: "*"
            state: latest
       - name: Installing required Java
         yum: 
-          name: java-1.8.0-openjdk
+          name: "{{req_java}}"
           state: present
+      - name: Setting default java
+        alternatives: 
+          name: java
+          link: /usr/bin/java # it can be obtain via java --version 
+          path: /usr/lib/jvm/set_java/bin.java
           
 
 
