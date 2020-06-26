@@ -1,5 +1,5 @@
 ---
-  - name: Intall and configure tomcat
+  - name: Install and configure tomcat
     hosts: 54.72.117.90
     gather_facts: false
     vars:
